@@ -12,6 +12,7 @@ const mockedUser: User = {
     country: 'countryName',
   },
   files: [],
+  created_at: new Date(),
 };
 
 export default mockedUser;
