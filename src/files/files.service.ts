@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import PublicFile from './publicFile.entity';
 import {
   S3Client,
@@ -71,5 +71,22 @@ export class FilesService {
 
     // Remove the file record from the database
     await this.publicFilesRepository.delete(fileId);
+  }
+
+  async deletePublicFileWithQueryRunner(
+    fileId: number,
+    queryRunner: QueryRunner,
+  ) {
+    const file = await queryRunner.manager.findOne(PublicFile, {
+      where: { id: fileId },
+    });
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: this.configService.get<string>('AWS_PUBLIC_BUCKET_NAME'),
+      Key: file.key,
+    });
+
+    // Send the command to delete the file from S3
+    await this.s3Client.send(deleteCommand);
+    await queryRunner.manager.delete(PublicFile, fileId);
   }
 }
