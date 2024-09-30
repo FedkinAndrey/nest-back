@@ -11,7 +11,6 @@ import User from '../users/user.entity';
 import Category from '../categories/category.entity';
 
 @Entity()
-@Index(['postId', 'authorId'])
 class Post {
   @PrimaryGeneratedColumn()
   public id: number;
