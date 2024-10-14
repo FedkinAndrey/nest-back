@@ -112,7 +112,6 @@ export class UsersService {
   }
 
   async getPrivateFile(userId: number, fileId: number) {
-    console.log(userId, fileId);
     const file = await this.privateFilesService.getPrivateFile(fileId);
     if (file.info.owner.id === userId) {
       return file;
