@@ -8,7 +8,29 @@ import PostSearchBody from './types/postSearchBody.interface';
 export default class PostsSearchService {
   index = 'posts';
 
-  constructor(private readonly elasticsearchService: ElasticsearchService) {}
+  constructor(private readonly elasticsearchService: ElasticsearchService) {
+    this.createIndexIfNotExists();
+  }
+
+  async createIndexIfNotExists() {
+    const indexExists = await this.elasticsearchService.indices.exists({
+      index: this.index,
+    });
+    if (!indexExists) {
+      await this.elasticsearchService.indices.create({
+        index: this.index,
+        mappings: {
+          properties: {
+            id: { type: 'integer' },
+            title: { type: 'text' },
+            paragraphs: { type: 'text' },
+            authorId: { type: 'integer' },
+          },
+        },
+      });
+      console.log(`Created index [${this.index}] with mappings.`);
+    }
+  }
 
   async indexPost(post: Post) {
     return this.elasticsearchService.index<PostSearchBody>({
@@ -46,10 +68,11 @@ export default class PostsSearchService {
       size: limit,
       query: {
         bool: {
-          should: {
+          must: {
             multi_match: {
               query: text,
               fields: ['title', 'paragraphs'],
+              type: 'phrase',
             },
           },
           filter: {
@@ -68,13 +91,17 @@ export default class PostsSearchService {
       },
     });
 
+    console.log('document', document);
+
     const count =
       typeof document.hits.total === 'number'
         ? document.hits.total
         : document.hits.total.value;
 
     const hits = document.hits.hits;
-    const results = hits.map((item) => item._source); // Map each hit to its _source
+    const results = hits.map(
+      (item) => item._source as unknown as PostSearchBody,
+    ); // Map each hit to its _source
 
     return {
       count: startId ? separateCount : count,
