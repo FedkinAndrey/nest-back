@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { SearchModule } from './search/search.module';
 import { CategoriesModule } from './categories/categories.module';
+import { SubscribersModule } from './subscribers/subscribers.module';
 
 @Module({
   imports: [
@@ -31,6 +32,8 @@ import { CategoriesModule } from './categories/categories.module';
         ELASTICSEARCH_NODE: Joi.string(),
         ELASTICSEARCH_USERNAME: Joi.string(),
         ELASTICSEARCH_PASSWORD: Joi.string(),
+        SUBSCRIBERS_SERVICE_HOST: Joi.string(),
+        SUBSCRIBERS_SERVICE_PORT: Joi.string(),
       }),
     }),
     DatabaseModule,
@@ -38,6 +41,7 @@ import { CategoriesModule } from './categories/categories.module';
     UsersModule,
     CategoriesModule,
     SearchModule,
+    SubscribersModule,
   ],
   controllers: [],
   providers: [],
